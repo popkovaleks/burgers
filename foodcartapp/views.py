@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
+from rest_framework.decorators import api_view
 import json
 
 
@@ -57,10 +58,11 @@ def product_list_api(request):
         'indent': 4,
     })
 
-
+@api_view(['POST'])
 def register_order(request):
     try:
-        order_data = json.loads(request.body.decode())
+        order_data = request.data
+        print(order_data)
         if order_data.get('products'):
             order = Order.objects.create(
                 name = order_data.get('firstname', ''),
@@ -80,5 +82,4 @@ def register_order(request):
                     )
     except ValueError as e:
         print(e)
-    # TODO это лишь заглушка
     return JsonResponse({})
