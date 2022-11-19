@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 import json
 
 
@@ -63,23 +65,31 @@ def register_order(request):
     try:
         order_data = request.data
         print(order_data)
-        if order_data.get('products'):
-            order = Order.objects.create(
-                name = order_data.get('firstname', ''),
-                last_name = order_data.get('lastname',''),
-                phone_number = order_data['phonenumber'],
-                address = order_data['address']
-            )
 
-            if order:
-                print(order)
-                for product in order_data['products']:
-                    print(product)
-                    OrderElement.objects.create(
-                        order=order,
-                        product_id=product['product'],
-                        quantity=product['quantity']
-                    )
+        if order_data.get('products') == None:
+            return Response({"error":"products is required field"})
+
+        if not isinstance(order_data.get('products'), list):
+            return Response({"error":"products is not a list"})
+            
+        if order_data.get('products') == []:
+            return Response({"error":"products is an empty list"})
+        order = Order.objects.create(
+            name = order_data.get('firstname', ''),
+            last_name = order_data.get('lastname',''),
+            phone_number = order_data['phonenumber'],
+            address = order_data['address']
+        )
+
+        if order:
+            print(order)
+            for product in order_data['products']:
+                print(product)
+                OrderElement.objects.create(
+                    order=order,
+                    product_id=product['product'],
+                    quantity=product['quantity']
+                )
     except ValueError as e:
         print(e)
     return JsonResponse({})
