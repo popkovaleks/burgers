@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Sum
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -128,7 +128,7 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
     def orders_with_cost(self):
         return self\
-            .annotate(cost=F('orderelement__product__price')*F('orderelement__quantity'))
+            .annotate(cost=Sum(F('orderelement__product__price')*F('orderelement__quantity')))
 
 
 
@@ -169,5 +169,13 @@ class OrderElement(models.Model):
         verbose_name='продукт',
         on_delete=models.CASCADE
     )
+
+    # element_price = models.DecimalField(
+    #     'цена',
+    #     max_digits=8,
+    #     decimal_places=2,
+    #     validators=[MinValueValidator(0)],
+    #     default=
+    # )
 
     quantity = models.IntegerField(verbose_name='количество')
