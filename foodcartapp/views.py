@@ -1,16 +1,12 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
-from django.shortcuts import get_object_or_404
-from django.core.exceptions import ValidationError
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from phonenumber_field.validators import validate_international_phonenumber
-import json
 
 
 from foodcartapp.models import Product, Order, OrderElement
-from foodcartapp.serializers import OrderElementsSerializer, OrderSerializer
+from foodcartapp.serializers import OrderSerializer
 
 
 def banners_list_api(request):
@@ -84,7 +80,7 @@ def register_order(request):
         products = [OrderElement(order=order, **fields) for fields in products_fields]
         OrderElement.objects.bulk_create(products)
         
-        response = Response({}, status=status.HTTP_200_OK)
+        response = Response(serializer.data, status=status.HTTP_200_OK)
     except ValueError as e:
         print(e)
     return response
