@@ -94,4 +94,5 @@ def view_restaurants(request):
 def view_orders(request):
     return render(request, template_name='order_items.html', context={
         'order_items': Order.objects.orders_with_cost(),
+        'current_url': request.path
     })
