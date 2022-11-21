@@ -168,6 +168,9 @@ class Order(models.Model):
         default=CREATED
     )
 
+    comment = models.TextField(blank=True)
+
+
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
