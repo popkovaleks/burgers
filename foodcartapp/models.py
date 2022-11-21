@@ -149,6 +149,25 @@ class Order(models.Model):
         'адрес',
         max_length=200)
 
+    CREATED = 'CR'
+    COOKING = 'CK'
+    DELIVERY = 'DL'
+    DONE = 'DN'
+
+    ORDER_STATUSES = [
+        (CREATED, 'Created'),
+        (COOKING, 'Cooking'),
+        (DELIVERY, 'Delivery'),
+        (DONE, 'Done')
+    ]
+
+
+    status = models.CharField(
+        max_length=2,
+        choices=ORDER_STATUSES,
+        default=CREATED
+    )
+
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
