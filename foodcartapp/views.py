@@ -77,9 +77,10 @@ def register_order(request):
             )
 
         products_fields = serializer.validated_data['products']
-        products = [OrderElement(order=order, **fields) for fields in products_fields]
-        OrderElement.objects.bulk_create(products)
-        
+        for product in products_fields:
+            order_element = OrderElement(order=order, **product)
+            order_element.set_element_price()
+            order_element.save()
         response = Response(serializer.data, status=status.HTTP_200_OK)
     except ValueError as e:
         print(e)
