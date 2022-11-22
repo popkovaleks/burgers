@@ -169,6 +169,22 @@ class Order(models.Model):
         default=CREATED
     )
 
+    CASH = 'CH'
+    CARD = 'CD'
+    ONLINE = 'ON'
+
+    PAYMENT_METHODS = [
+        (CASH, 'Наличные'),
+        (CARD, 'Карта'),
+        (ONLINE, 'Онлайн')
+    ]
+
+    payment_method = models.CharField(
+        max_length=2,
+        choices=PAYMENT_METHODS,
+        default=CASH
+    )
+
     comment = models.TextField(blank=True)
 
     created_at = models.DateTimeField(default=timezone.now)
