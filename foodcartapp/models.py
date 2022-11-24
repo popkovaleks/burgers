@@ -126,6 +126,7 @@ class RestaurantMenuItem(models.Model):
         return f"{self.restaurant.name} - {self.product.name}"
 
 
+
 class OrderQuerySet(models.QuerySet):
     def orders_with_cost(self):
         return self\
@@ -185,13 +186,21 @@ class Order(models.Model):
         default=CASH
     )
 
+    restaurant = models.ForeignKey(
+        Restaurant,
+        related_name='order',
+        verbose_name='ресторан',
+        on_delete=models.CASCADE,
+        null=True
+    )
+
     comment = models.TextField(blank=True)
 
     created_at = models.DateTimeField(default=timezone.now)
 
-    called_at = models.DateTimeField(null=True)
+    called_at = models.DateTimeField(null=True, blank=True)
 
-    delivered_at = models.DateTimeField(null=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
 
 
     class Meta:
@@ -227,3 +236,5 @@ class OrderElement(models.Model):
 
     def set_element_price(self):
         self.element_price = self.product.price
+
+    

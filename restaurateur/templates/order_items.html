@@ -21,6 +21,7 @@
       <th>Адрес доставки</th>
       <th>Стоимость заказа</th>
       <th>Комментарий</th>
+      <th>Ресторан</th>
       <th>Ссылка на админку</th>
     </tr>
 
@@ -35,6 +36,20 @@
         <td>{{ item.address }}</td>
         <td>{{ item.cost }}</td>
         <td>{{ item.comment }}</td>
+        <td>{% if item.restaurant %}
+          Готовится в:
+          {{ item.restaurant }}
+          {% else %}
+          Может быть приготовлено в:
+          <ul>
+            {% for rest in item.possible_restaurant %}
+              <li>{{ rest }}</li>
+            {% endfor %} 
+          </ul>
+          
+          {% endif %}
+        </td>
+       
         <td><a href="{% url 'admin:foodcartapp_order_change' object_id=item.id %}?next={{ current_url|urlencode:'' }}">Редактировать</a></td>
       </tr>
     {% endif %}

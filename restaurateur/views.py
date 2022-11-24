@@ -6,9 +6,9 @@ from django.contrib.auth.decorators import user_passes_test
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
+from functools import reduce
 
-
-from foodcartapp.models import Product, Restaurant, Order
+from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem, OrderElement
 
 
 class Login(forms.Form):
@@ -89,10 +89,26 @@ def view_restaurants(request):
         'restaurants': Restaurant.objects.all(),
     })
 
+def intersect_queries(q1, q2):
+    return q1 & q2
+    
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
+    orders = Order.objects.orders_with_cost()
+
+    for order in orders:
+        if order.restaurant is None:
+            order_elements = OrderElement.objects.filter(order_id=order.id).values_list('product', flat=True)
+            restauraunts_before_intersection = []
+            for element in order_elements:
+                restaurants = set(RestaurantMenuItem.objects.filter(product=element).values_list('restaurant__name', flat=True))
+                restauraunts_before_intersection.append(restaurants)
+            shared_restaurants = reduce(lambda q1, q2: set(q1) & set(q2), restauraunts_before_intersection) if restauraunts_before_intersection else []
+            
+            order.possible_restaurant = list(shared_restaurants)
+            
     return render(request, template_name='order_items.html', context={
-        'order_items': Order.objects.orders_with_cost(),
-        'current_url': request.path
+        'order_items': orders,
+        'current_url': request.path,
     })
