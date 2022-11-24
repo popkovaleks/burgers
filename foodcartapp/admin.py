@@ -126,3 +126,8 @@ class OrderAdmin(admin.ModelAdmin):
             return redirect(request.GET['next'])
         return res
 
+    def save_model(self, request, obj, form, change):
+        if change:
+            if 'restaurant' in form.changed_data and not form.initial.get('restaurant'):
+                obj.status = obj.COOKING
+        obj.save()

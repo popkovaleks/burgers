@@ -95,7 +95,7 @@ def intersect_queries(q1, q2):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.orders_with_cost()
+    orders = Order.objects.orders_with_cost().order_by('-status')
 
     for order in orders:
         if order.restaurant is None:
