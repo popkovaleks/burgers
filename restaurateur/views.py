@@ -3,12 +3,13 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
-
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from functools import reduce
+from geopy import distance
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem, OrderElement
+from restaurateur.geocoder import fetch_coordinates
 
 
 class Login(forms.Form):
@@ -106,8 +107,19 @@ def view_orders(request):
                 restauraunts_before_intersection.append(restaurants)
             shared_restaurants = reduce(lambda q1, q2: set(q1) & set(q2), restauraunts_before_intersection) if restauraunts_before_intersection else []
             
+            try:
+                address_lon, address_lat = fetch_coordinates(order.address)
+                shared_restaurants_with_distance = []
+                for rest in shared_restaurants:
+                    rest_lon, rest_lat = fetch_coordinates(rest)
+                    rest_address_distance = distance.distance((rest_lat, rest_lon), (address_lat, address_lon)).km
+                    shared_restaurants_with_distance.append((rest, rest_address_distance))
+
+                order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])
+            except TypeError:
+                print('Type Error. Geo coder cannot find coordinates')
+
             order.possible_restaurant = list(shared_restaurants)
-            
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
         'current_url': request.path,

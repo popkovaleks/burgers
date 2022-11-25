@@ -43,7 +43,12 @@
           Может быть приготовлено в:
           <ul>
             {% for rest in item.possible_restaurant %}
-              <li>{{ rest }}</li>
+              <li>{% if rest|length == 2 %}
+                {{ rest.0 }} - {{ rest.1 }} km
+                {% else %}
+                {{ rest }}
+                {% endif %}
+              </li>
             {% endfor %} 
           </ul>
           
