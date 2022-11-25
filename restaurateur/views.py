@@ -5,11 +5,13 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
+from django.utils import timezone
 from functools import reduce
 from geopy import distance
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem, OrderElement
 from restaurateur.geocoder import fetch_coordinates
+from geoinfo.models import PlaceCoordinates
 
 
 class Login(forms.Form):
@@ -90,8 +92,20 @@ def view_restaurants(request):
         'restaurants': Restaurant.objects.all(),
     })
 
-def intersect_queries(q1, q2):
-    return q1 & q2
+
+def get_coords(place):
+    place_coord, created = PlaceCoordinates.objects.get_or_create(place=place)
+    if created or timezone.now() - place_coord.last_update > timezone.timedelta(days=30):
+        try:
+            address_lon, address_lat = fetch_coordinates(place)
+            place_coord.place_lat = address_lat
+            place_coord.place_lon = address_lon
+            place_coord.last_update = timezone.now()
+            place_coord.save()
+            
+        except TypeError as e:
+            print(f'{place_coord.place} {e}')
+    return place_coord.place_lat, place_coord.place_lon
     
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
@@ -108,18 +122,19 @@ def view_orders(request):
             shared_restaurants = reduce(lambda q1, q2: set(q1) & set(q2), restauraunts_before_intersection) if restauraunts_before_intersection else []
             
             try:
-                address_lon, address_lat = fetch_coordinates(order.address)
+                address_lat, address_lon = get_coords(order.address)
+                
                 shared_restaurants_with_distance = []
+
                 for rest in shared_restaurants:
-                    rest_lon, rest_lat = fetch_coordinates(rest)
+                    rest_lat, rest_lon = get_coords(rest)
+                    
                     rest_address_distance = distance.distance((rest_lat, rest_lon), (address_lat, address_lon)).km
                     shared_restaurants_with_distance.append((rest, rest_address_distance))
 
-                order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])
+                    order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])
             except TypeError:
-                print('Type Error. Geo coder cannot find coordinates')
-
-            order.possible_restaurant = list(shared_restaurants)
+                order.possible_restaurant = list(shared_restaurants)
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
         'current_url': request.path,

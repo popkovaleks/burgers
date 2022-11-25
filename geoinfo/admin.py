@@ -1,3 +1,7 @@
 from django.contrib import admin
+from geoinfo.models import PlaceCoordinates
 
-# Register your models here.
+
+@admin.register(PlaceCoordinates)
+class PlaceCoordinatesAdmin(admin.ModelAdmin):
+    pass
