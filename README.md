@@ -58,7 +58,10 @@ pip install -r requirements.txt
 ```sh
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 ```
-
+Необходимо создать ключ для api геокодера яндекса по [ссылке](https://developer.tech.yandex.ru/services). Ключ положить в файл `.env` в виде:
+```sh
+GEO_CODER_API_KEY=<ключ от api>
+```
 Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
 
 ```sh
