@@ -232,7 +232,10 @@ class OrderElement(models.Model):
         validators=[MinValueValidator(0)]
     )
 
-    quantity = models.IntegerField(verbose_name='количество')
+    quantity = models.IntegerField(
+        verbose_name='количество',
+        validators=[MinValueValidator(0)]
+        )
 
     def set_element_price(self):
         self.price = self.product.price
