@@ -182,8 +182,7 @@ class Order(models.Model):
 
     payment_method = models.CharField(
         max_length=2,
-        choices=PAYMENT_METHODS,
-        default=CASH
+        choices=PAYMENT_METHODS
     )
 
     cooking_restaurant = models.ForeignKey(
