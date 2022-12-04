@@ -188,7 +188,7 @@ class Order(models.Model):
 
     restaurant = models.ForeignKey(
         Restaurant,
-        related_name='order',
+        related_name='orders',
         verbose_name='ресторан',
         on_delete=models.CASCADE,
         null=True
@@ -214,7 +214,7 @@ class Order(models.Model):
 class OrderElement(models.Model):
     order = models.ForeignKey(
         Order,
-        related_name='orderelement',
+        related_name='orderelements',
         verbose_name='заказ',
         on_delete=models.CASCADE)
 
@@ -228,8 +228,7 @@ class OrderElement(models.Model):
         'цена',
         max_digits=8,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
-        default=0
+        validators=[MinValueValidator(0)]
     )
 
     quantity = models.IntegerField(verbose_name='количество')
