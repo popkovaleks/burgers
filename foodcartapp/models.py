@@ -194,13 +194,23 @@ class Order(models.Model):
         null=True
     )
 
-    comment = models.TextField(blank=True)
+    comment = models.TextField(
+        blank=True,
+        verbose_name='комментарий')
 
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(
+        default=timezone.now,
+        verbose_name='Дата создания')
 
-    called_at = models.DateTimeField(null=True, blank=True)
+    called_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Время звонка')
 
-    delivered_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='время доставки')
 
 
     class Meta:
