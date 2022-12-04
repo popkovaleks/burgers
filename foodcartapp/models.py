@@ -220,6 +220,7 @@ class OrderElement(models.Model):
 
     product = models.ForeignKey(
         Product,
+        related_name='orderelements',
         verbose_name='продукт',
         on_delete=models.CASCADE
     )
