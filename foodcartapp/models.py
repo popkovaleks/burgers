@@ -214,13 +214,13 @@ class Order(models.Model):
 class OrderElement(models.Model):
     order = models.ForeignKey(
         Order,
-        related_name='orderelements',
+        related_name='order_elements',
         verbose_name='заказ',
         on_delete=models.CASCADE)
 
     product = models.ForeignKey(
         Product,
-        related_name='orderelements',
+        related_name='order_elements',
         verbose_name='продукт',
         on_delete=models.CASCADE
     )
