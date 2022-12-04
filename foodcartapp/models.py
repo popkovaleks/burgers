@@ -130,7 +130,7 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
     def orders_with_cost(self):
         return self\
-            .annotate(cost=Sum(F('orderelements__price')*F('orderelements__quantity')))
+            .annotate(cost=Sum(F('order_elements__price')*F('order_elements__quantity')))
 
 
 
@@ -186,7 +186,7 @@ class Order(models.Model):
         default=CASH
     )
 
-    restaurant = models.ForeignKey(
+    cooking_restaurant = models.ForeignKey(
         Restaurant,
         related_name='orders',
         verbose_name='ресторан',

@@ -128,6 +128,6 @@ class OrderAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if change:
-            if 'restaurant' in form.changed_data and not form.initial.get('restaurant'):
+            if 'cooking_restaurant' in form.changed_data and not form.initial.get('cooking_restaurant'):
                 obj.status = obj.COOKING
         obj.save()
