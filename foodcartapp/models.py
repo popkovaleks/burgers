@@ -135,7 +135,28 @@ class OrderQuerySet(models.QuerySet):
 
 
 class Order(models.Model):
-    objects = OrderQuerySet.as_manager()
+
+    CREATED = 'CR'
+    COOKING = 'CK'
+    DELIVERY = 'DL'
+    DONE = 'DN'
+
+    ORDER_STATUSES = [
+        (CREATED, 'Created'),
+        (COOKING, 'Cooking'),
+        (DELIVERY, 'Delivery'),
+        (DONE, 'Done')
+    ]
+
+    CASH = 'CH'
+    CARD = 'CD'
+    ONLINE = 'ON'
+
+    PAYMENT_METHODS = [
+        (CASH, 'Наличные'),
+        (CARD, 'Карта'),
+        (ONLINE, 'Онлайн')
+    ]
 
     firstname = models.CharField(
         'имя',
@@ -151,34 +172,11 @@ class Order(models.Model):
         'адрес',
         max_length=200)
 
-    CREATED = 'CR'
-    COOKING = 'CK'
-    DELIVERY = 'DL'
-    DONE = 'DN'
-
-    ORDER_STATUSES = [
-        (CREATED, 'Created'),
-        (COOKING, 'Cooking'),
-        (DELIVERY, 'Delivery'),
-        (DONE, 'Done')
-    ]
-
-
     status = models.CharField(
         max_length=2,
         choices=ORDER_STATUSES,
         default=CREATED
     )
-
-    CASH = 'CH'
-    CARD = 'CD'
-    ONLINE = 'ON'
-
-    PAYMENT_METHODS = [
-        (CASH, 'Наличные'),
-        (CARD, 'Карта'),
-        (ONLINE, 'Онлайн')
-    ]
 
     payment_method = models.CharField(
         max_length=2,
@@ -211,6 +209,7 @@ class Order(models.Model):
         blank=True,
         verbose_name='время доставки')
 
+    objects = OrderQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'заказ'
