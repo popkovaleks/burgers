@@ -65,25 +65,21 @@ def product_list_api(request):
 @api_view(['POST'])
 @transaction.atomic
 def register_order(request):
-    try:
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
         
-        serializer = OrderSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-            
-    
-        order = Order.objects.create(
-                firstname = serializer.validated_data['firstname'],
-                lastname = serializer.validated_data['lastname'],
-                phonenumber = serializer.validated_data['phonenumber'],
-                address = serializer.validated_data['address']
-            )
 
-        products_fields = serializer.validated_data['products']
-        for product in products_fields:
-            order_element = OrderElement(order=order, **product)
-            order_element.set_element_price()
-            order_element.save()
-        response = Response(serializer.data, status=status.HTTP_200_OK)
-    except ValueError as e:
-        print(e)
+    order = Order.objects.create(
+            firstname = serializer.validated_data['firstname'],
+            lastname = serializer.validated_data['lastname'],
+            phonenumber = serializer.validated_data['phonenumber'],
+            address = serializer.validated_data['address']
+        )
+
+    products_fields = serializer.validated_data['products']
+    for product in products_fields:
+        order_element = OrderElement(order=order, **product)
+        order_element.set_element_price()
+        order_element.save()
+    response = Response(serializer.data, status=status.HTTP_200_OK)
     return response
