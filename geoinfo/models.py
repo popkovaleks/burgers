@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 class PlaceCoordinates(models.Model):
-    place = models.CharField(max_length=200,
+    place_name = models.CharField(max_length=200,
         unique=True,
         verbose_name='Место')
 

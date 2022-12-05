@@ -94,7 +94,7 @@ def view_restaurants(request):
 
 
 def get_coords(place):
-    place_coord, created = PlaceCoordinates.objects.get_or_create(place=place)
+    place_coord, created = PlaceCoordinates.objects.get_or_create(place_name=place)
     if created or timezone.now() - place_coord.last_update > timezone.timedelta(days=30):
         try:
             address_lon, address_lat = fetch_coordinates(place)
@@ -104,7 +104,7 @@ def get_coords(place):
             place_coord.save()
             
         except TypeError as e:
-            print(f'{place_coord.place} {e}')
+            print(f'{place_coord.place_name} {e}')
     return place_coord.place_lat, place_coord.place_lon
     
 
