@@ -15,7 +15,7 @@ class PlaceCoordinates(models.Model):
         verbose_name='Широта')
 
     last_update = models.DateTimeField(
-        default=timezone.now(),
+        auto_now_add=True,
         verbose_name='Последнее обновление')
 
     def __str__(self):
