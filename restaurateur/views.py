@@ -113,7 +113,7 @@ def view_orders(request):
     orders = Order.objects.orders_with_cost().order_by('-status')
 
     for order in orders:
-        if order.cooking_restaurant is None:
+        if not order.cooking_restaurant:
             order_elements = OrderElement.objects.filter(order_id=order.id).values_list('product', flat=True)
             restauraunts_before_intersection = []
             for element in order_elements:
