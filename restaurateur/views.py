@@ -10,7 +10,7 @@ from functools import reduce
 from geopy import distance
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem, OrderElement
-from restaurateur.geocoder import fetch_coordinates
+from geoinfo.geocoder import fetch_coordinates
 from geoinfo.models import PlaceCoordinates
 
 
