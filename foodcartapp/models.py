@@ -161,30 +161,24 @@ class Order(models.Model):
     firstname = models.CharField(
         'имя',
         max_length=200)
-
     lastname = models.CharField(
         'фамилия',
         max_length=200)
-
     phonenumber = PhoneNumberField('номер телефона')
-
     address = models.CharField(
         'адрес',
         max_length=200)
-
     status = models.CharField(
         max_length=2,
         choices=ORDER_STATUSES,
         default=CREATED,
         verbose_name='статус заказа'
     )
-
     payment_method = models.CharField(
         max_length=2,
         choices=PAYMENT_METHODS,
         verbose_name='способ оплаты'
     )
-
     cooking_restaurant = models.ForeignKey(
         Restaurant,
         related_name='orders',
@@ -192,20 +186,16 @@ class Order(models.Model):
         on_delete=models.CASCADE,
         null=True
     )
-
     comment = models.TextField(
         blank=True,
         verbose_name='комментарий')
-
     created_at = models.DateTimeField(
         default=timezone.now,
         verbose_name='Дата создания')
-
     called_at = models.DateTimeField(
         null=True,
         blank=True,
         verbose_name='Время звонка')
-
     delivered_at = models.DateTimeField(
         null=True,
         blank=True,
@@ -227,21 +217,18 @@ class OrderElement(models.Model):
         related_name='order_elements',
         verbose_name='заказ',
         on_delete=models.CASCADE)
-
     product = models.ForeignKey(
         Product,
         related_name='order_elements',
         verbose_name='продукт',
         on_delete=models.CASCADE
     )
-
     price = models.DecimalField(
         'цена',
         max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0)]
     )
-
     quantity = models.IntegerField(
         verbose_name='количество',
         validators=[MinValueValidator(0)]
@@ -249,5 +236,3 @@ class OrderElement(models.Model):
 
     def set_element_price(self):
         self.price = self.product.price
-
-    
