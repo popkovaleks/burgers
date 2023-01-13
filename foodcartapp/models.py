@@ -175,12 +175,14 @@ class Order(models.Model):
     status = models.CharField(
         max_length=2,
         choices=ORDER_STATUSES,
-        default=CREATED
+        default=CREATED,
+        verbose_name='статус заказа'
     )
 
     payment_method = models.CharField(
         max_length=2,
-        choices=PAYMENT_METHODS
+        choices=PAYMENT_METHODS,
+        verbose_name='способ оплаты'
     )
 
     cooking_restaurant = models.ForeignKey(
