@@ -113,28 +113,31 @@ def view_orders(request):
     orders = Order.objects.orders_with_cost().order_by('-status')
 
     for order in orders:
-        if not order.cooking_restaurant:
-            order_elements = order.elements.values_list('product', flat=True)
-            restauraunts_before_intersection = []
-            for element in order_elements:
-                restaurants = set(RestaurantMenuItem.objects.filter(product=element).values_list('restaurant__name', flat=True))
-                restauraunts_before_intersection.append(restaurants)
-            shared_restaurants = reduce(lambda q1, q2: set(q1) & set(q2), restauraunts_before_intersection) if restauraunts_before_intersection else []
+        if order.cooking_restaurant:
+            continue
+        
+        order_elements = order.elements.values_list('product', flat=True)
+        restauraunts_before_intersection = []
+        for element in order_elements:
+            restaurants = set(RestaurantMenuItem.objects.filter(product=element).values_list('restaurant__name', flat=True))
+            restauraunts_before_intersection.append(restaurants)
+        shared_restaurants = reduce(lambda q1, q2: set(q1) & set(q2), restauraunts_before_intersection) if restauraunts_before_intersection else []
+        
+        try:
+            address_lat, address_lon = get_coords(order.address)
             
-            try:
-                address_lat, address_lon = get_coords(order.address)
+            shared_restaurants_with_distance = []
+
+            for rest in shared_restaurants:
+                rest_lat, rest_lon = get_coords(rest)
                 
-                shared_restaurants_with_distance = []
+                rest_address_distance = distance.distance((rest_lat, rest_lon), (address_lat, address_lon)).km
+                shared_restaurants_with_distance.append((rest, rest_address_distance))
 
-                for rest in shared_restaurants:
-                    rest_lat, rest_lon = get_coords(rest)
-                    
-                    rest_address_distance = distance.distance((rest_lat, rest_lon), (address_lat, address_lon)).km
-                    shared_restaurants_with_distance.append((rest, rest_address_distance))
+                order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])
+        except TypeError:
+            order.possible_restaurant = list(shared_restaurants)
 
-                    order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])
-            except TypeError:
-                order.possible_restaurant = list(shared_restaurants)
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
         'current_url': request.path,
