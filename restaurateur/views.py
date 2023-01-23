@@ -114,7 +114,7 @@ def view_orders(request):
 
     for order in orders:
         if not order.cooking_restaurant:
-            order_elements = order.order_elements.values_list('product', flat=True)
+            order_elements = order.elements.values_list('product', flat=True)
             restauraunts_before_intersection = []
             for element in order_elements:
                 restaurants = set(RestaurantMenuItem.objects.filter(product=element).values_list('restaurant__name', flat=True))
