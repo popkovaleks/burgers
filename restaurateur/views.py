@@ -96,15 +96,13 @@ def view_restaurants(request):
 def get_coords(place):
     place_coord, created = PlaceCoordinates.objects.get_or_create(place_name=place)
     if created or timezone.now() - place_coord.last_update > timezone.timedelta(days=30):
-        try:
-            address_lon, address_lat = fetch_coordinates(place)
-            place_coord.place_lat = address_lat
-            place_coord.place_lon = address_lon
-            place_coord.last_update = timezone.now()
-            place_coord.save()
-            
-        except TypeError as e:
-            print(f'{place_coord.place_name} {e}')
+        
+        address_lon, address_lat = fetch_coordinates(place)
+        place_coord.place_lat = address_lat
+        place_coord.place_lon = address_lon
+        place_coord.last_update = timezone.now()
+        place_coord.save()
+        
     return place_coord.place_lat, place_coord.place_lon
     
 
@@ -115,7 +113,7 @@ def view_orders(request):
     for order in orders:
         if order.cooking_restaurant:
             continue
-        
+
         order_elements = order.elements.values_list('product', flat=True)
         restauraunts_before_intersection = []
         for element in order_elements:
@@ -125,18 +123,20 @@ def view_orders(request):
         
         try:
             address_lat, address_lon = get_coords(order.address)
-            
-            shared_restaurants_with_distance = []
-
-            for rest in shared_restaurants:
-                rest_lat, rest_lon = get_coords(rest)
-                
-                rest_address_distance = distance.distance((rest_lat, rest_lon), (address_lat, address_lon)).km
-                shared_restaurants_with_distance.append((rest, rest_address_distance))
-
-                order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])
         except TypeError:
             order.possible_restaurant = list(shared_restaurants)
+            continue
+            
+        shared_restaurants_with_distance = []
+
+        for rest in shared_restaurants:
+            rest_lat, rest_lon = get_coords(rest)
+            
+            rest_address_distance = distance.distance((rest_lat, rest_lon), (address_lat, address_lon)).km
+            shared_restaurants_with_distance.append((rest, rest_address_distance))
+
+            order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])
+        
 
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
