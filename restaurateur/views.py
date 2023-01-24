@@ -109,32 +109,38 @@ def get_coords(place):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.orders_with_cost().order_by('-status')
+    restaurants = Restaurant.objects.all().prefetch_related('menu_items')
+
+    
 
     for order in orders:
         if order.cooking_restaurant:
             continue
 
-        order_elements = order.elements.values_list('product', flat=True)
-        restauraunts_before_intersection = []
-        for element in order_elements:
-            restaurants = set(RestaurantMenuItem.objects.filter(product=element).values_list('restaurant__name', flat=True))
-            restauraunts_before_intersection.append(restaurants)
-        shared_restaurants = reduce(lambda q1, q2: set(q1) & set(q2), restauraunts_before_intersection) if restauraunts_before_intersection else []
+        order_elements = set(item.product for item in order.elements.all())
+        possible_restaurants = []
+        for restaurant in restaurants:
+            rest_products = set(element.product for element in restaurant.menu_items.all())
+            if order_elements.issubset(rest_products):
+                possible_restaurants.append(restaurant.name)
         
         try:
             address_lat, address_lon = get_coords(order.address)
         except TypeError:
-            order.possible_restaurant = list(shared_restaurants)
-            continue
+            pass
             
         shared_restaurants_with_distance = []
 
-        for rest in shared_restaurants:
-            rest_lat, rest_lon = get_coords(rest)
+        for rest in possible_restaurants:
+            try:
+                rest_lat, rest_lon = get_coords(rest)
+            except TypeError:
+                order.possible_restaurant = list(possible_restaurants)
+                continue
             
             rest_address_distance = distance.distance((rest_lat, rest_lon), (address_lat, address_lon)).km
             shared_restaurants_with_distance.append((rest, rest_address_distance))
-
+            
             order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])
         
 
