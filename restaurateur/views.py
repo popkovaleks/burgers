@@ -6,11 +6,11 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.utils import timezone
-from functools import reduce
+from django.db.models import OuterRef, Subquery
 from geopy import distance
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem, OrderElement
-from geoinfo.geocoder import fetch_coordinates
+from geoinfo.geocoder import get_or_create_place
 from geoinfo.models import PlaceCoordinates
 
 
@@ -93,26 +93,14 @@ def view_restaurants(request):
     })
 
 
-def get_coords(place):
-    place_coord, created = PlaceCoordinates.objects.get_or_create(place_name=place)
-    if created or timezone.now() - place_coord.last_update > timezone.timedelta(days=30):
-        
-        address_lon, address_lat = fetch_coordinates(place)
-        place_coord.place_lat = address_lat
-        place_coord.place_lon = address_lon
-        place_coord.last_update = timezone.now()
-        place_coord.save()
-        
-    return place_coord.place_lat, place_coord.place_lon
-    
-
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.orders_with_cost().order_by('-status')
-    restaurants = Restaurant.objects.all().prefetch_related('menu_items')
-
+    places = PlaceCoordinates.objects.filter(place_name=OuterRef('address'))
+    orders = Order.objects.orders_with_cost().order_by('-status')\
+        .annotate(lon=Subquery(places.values('place_lon')), lat=Subquery(places.values('place_lat')))
+    restaurants = Restaurant.objects.all().prefetch_related('menu_items')\
+        .annotate(lon=Subquery(places.values('place_lon')), lat=Subquery(places.values('place_lat')))
     
-
     for order in orders:
         if order.cooking_restaurant:
             continue
@@ -124,21 +112,22 @@ def view_orders(request):
             if order_elements.issubset(rest_products):
                 possible_restaurants.append(restaurant.name)
         
-        try:
-            address_lat, address_lon = get_coords(order.address)
-        except TypeError:
-            pass
+        if not (order.lon or order.lat):
+            try:
+                order.lon, order.lat = get_or_create_place(order.address)
+            except TypeError:
+                pass
             
         shared_restaurants_with_distance = []
 
         for rest in possible_restaurants:
             try:
-                rest_lat, rest_lon = get_coords(rest)
+                rest_lon, rest_lat = get_or_create_place(rest)
             except TypeError:
                 order.possible_restaurant = list(possible_restaurants)
                 continue
             
-            rest_address_distance = distance.distance((rest_lat, rest_lon), (address_lat, address_lon)).km
+            rest_address_distance = distance.distance((rest_lat, rest_lon), (order.lat, order.lon)).km
             shared_restaurants_with_distance.append((rest, rest_address_distance))
             
             order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])

@@ -8,6 +8,7 @@ from rest_framework import status
 
 from foodcartapp.models import Product, Order, OrderElement
 from foodcartapp.serializers import OrderSerializer
+from geoinfo.geocoder import get_or_create_place
 
 
 def banners_list_api(request):
@@ -76,6 +77,8 @@ def register_order(request):
             address = serializer.validated_data['address']
         )
 
+    get_or_create_place(order.address)
+    
     products_fields = serializer.validated_data['products']
     
     OrderElement.objects.bulk_create(

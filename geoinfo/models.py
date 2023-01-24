@@ -16,4 +16,4 @@ class PlaceCoordinates(models.Model):
         verbose_name='Последнее обновление')
 
     def __str__(self):
-        return self.place
+        return self.place_name

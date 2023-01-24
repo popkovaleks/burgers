@@ -11,6 +11,8 @@ from .models import RestaurantMenuItem
 from .models import Order
 from .models import OrderElement
 
+from geoinfo.geocoder import get_or_create_place
+
 
 class RestaurantMenuItemInline(admin.TabularInline):
     model = RestaurantMenuItem
@@ -32,6 +34,11 @@ class RestaurantAdmin(admin.ModelAdmin):
     inlines = [
         RestaurantMenuItemInline
     ]
+
+    def save_model(self, request, obj, form, change):
+        if 'address' in form.changed_data:
+            get_or_create_place(form.data['address'])
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Product)

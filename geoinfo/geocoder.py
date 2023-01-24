@@ -1,6 +1,7 @@
 import requests
 
 from star_burger.settings import GEO_CODER_API_KEY
+from geoinfo.models import PlaceCoordinates
 
 def fetch_coordinates(address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
@@ -18,3 +19,17 @@ def fetch_coordinates(address):
     most_relevant = found_places[0]
     lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
     return lon, lat
+
+
+def get_or_create_place(address):
+    try:
+        place = PlaceCoordinates.objects.get(place_name=address)
+        return place.place_lon, place.place_lat
+    except PlaceCoordinates.DoesNotExist:
+        place_lon, place_lat = fetch_coordinates(address)
+        PlaceCoordinates.objects.create(
+            place_name=address,
+            place_lon=place_lon,
+            place_lat=place_lat
+        )
+        return place.place_lon, place.place_lat
