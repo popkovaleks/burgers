@@ -27,7 +27,7 @@ def get_or_create_place(address):
         return place.place_lon, place.place_lat
     except PlaceCoordinates.DoesNotExist:
         place_lon, place_lat = fetch_coordinates(address)
-        PlaceCoordinates.objects.create(
+        place = PlaceCoordinates.objects.create(
             place_name=address,
             place_lon=place_lon,
             place_lat=place_lat

@@ -95,11 +95,11 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    places = PlaceCoordinates.objects.filter(place_name=OuterRef('address'))
+    places_refs = PlaceCoordinates.objects.filter(place_name=OuterRef('address'))
     orders = Order.objects.orders_with_cost().order_by('-status')\
-        .annotate(lon=Subquery(places.values('place_lon')), lat=Subquery(places.values('place_lat')))
+        .annotate(lon=Subquery(places_refs.values('place_lon')), lat=Subquery(places_refs.values('place_lat')))
     restaurants = Restaurant.objects.all().prefetch_related('menu_items')\
-        .annotate(lon=Subquery(places.values('place_lon')), lat=Subquery(places.values('place_lat')))
+        .annotate(lon=Subquery(places_refs.values('place_lon')), lat=Subquery(places_refs.values('place_lat')))
     
     for order in orders:
         if order.cooking_restaurant:
@@ -110,25 +110,27 @@ def view_orders(request):
         for restaurant in restaurants:
             rest_products = set(element.product for element in restaurant.menu_items.all())
             if order_elements.issubset(rest_products):
-                possible_restaurants.append(restaurant.name)
+
+                possible_restaurants.append(restaurant)
         
         if not (order.lon or order.lat):
-            try:
-                order.lon, order.lat = get_or_create_place(order.address)
-            except TypeError:
-                pass
+            
+            order.lon, order.lat = get_or_create_place(order.address)
+
+        if (order.lon or order.lat) is None:
+            order.possible_restaurant = [restaurant.name for restaurant in possible_restaurants]
+            continue
             
         shared_restaurants_with_distance = []
 
         for rest in possible_restaurants:
-            try:
-                rest_lon, rest_lat = get_or_create_place(rest)
-            except TypeError:
-                order.possible_restaurant = list(possible_restaurants)
+            rest_lon, rest_lat = get_or_create_place(rest.address)
+            
+            if (rest_lon or rest_lat) is None:
                 continue
             
             rest_address_distance = distance.distance((rest_lat, rest_lon), (order.lat, order.lon)).km
-            shared_restaurants_with_distance.append((rest, rest_address_distance))
+            shared_restaurants_with_distance.append((rest.name, rest_address_distance))
             
             order.possible_restaurant = sorted(shared_restaurants_with_distance, key=lambda rest: rest[1])
         
