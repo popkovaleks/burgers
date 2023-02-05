@@ -62,6 +62,11 @@ SECRET_KEY=django-insecure-0if40nf4nf93n4
 ```sh
 GEO_CODER_API_KEY=<ключ от api>
 ```
+
+В файл `.env` необходимо вписать токен Rollbar:
+```
+ROLLBAR_TOKEN=<токен Rollbar>
+```
 Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
 
 ```sh
@@ -151,6 +156,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `GEO_CODER_API_KEY` - ключ для api геокодера яндекса по [ссылке](https://developer.tech.yandex.ru/services)
+- `ROLLBAR_TOKEN` - токен Rollbar
 
 ## Цели проекта
 
