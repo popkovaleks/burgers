@@ -1,6 +1,7 @@
 version: "3.9"
 services:
   postgres:
+    container_name: pg_container
     image: postgres:13.3
     # environment:
     #   POSTGRES_DB: "star-burger"
@@ -13,3 +14,4 @@ services:
       - .:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    restart: unless-stopped
