@@ -1,8 +1,8 @@
 bundles/**
 node_modules/
 media/
-
-pg_data/
+staticfiles/
+pgdata/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
