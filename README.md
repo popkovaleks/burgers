@@ -159,9 +159,6 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `GEO_CODER_API_KEY` - ключ для api геокодера яндекса по [ссылке](https://developer.tech.yandex.ru/services)
 - `ROLLBAR_TOKEN` - токен Rollbar
-- `POSTGRES_DB` - название бд
-- `POSTGRES_USER` - имя пользователя postgres
-- `POSTGRES_PASSWORD` - пароль пользователя postgres
 - `PGDATA` - путь до места хранения данных
 - `DB_URL` - адрес для базы данных в формате django databse url
 
